@@ -4,7 +4,6 @@ from django.core import mail
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
-from urlman import Urls
 
 from django_lifecycle import hook
 from django_lifecycle.models import LifecycleModel
@@ -40,8 +39,8 @@ class UserAccount(LifecycleModel):
         choices=(("active", "Active"), ("banned", "Banned"), ("inactive", "Inactive")),
     )
 
-    class urls(Urls):
-        view = "/books/{self.pk}/"
+    # class urls(Urls):
+    #     view = "/books/{self.pk}/"
 
     @hook("before_save", when="email", is_not=None)
     def lowercase_email(self):

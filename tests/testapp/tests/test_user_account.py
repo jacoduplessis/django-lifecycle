@@ -3,8 +3,6 @@ import datetime
 from django.core import mail
 from django.test import TestCase
 
-from django_capture_on_commit_callbacks import capture_on_commit_callbacks
-
 from tests.testapp.models import CannotDeleteActiveTrial, Organization, UserAccount
 
 
@@ -24,10 +22,10 @@ class UserAccountTestCase(TestCase):
         self.assertTrue(isinstance(account.joined_at, datetime.datetime))
 
     def test_send_welcome_email_after_create(self):
-        with capture_on_commit_callbacks(execute=True) as callbacks:
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
             UserAccount.objects.create(**self.stub_data)
         
-        self.assertEquals(len(callbacks), 1, msg=f"{callbacks}")
+        self.assertEqual(len(callbacks), 1, msg=f"{callbacks}")
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, "Welcome!")
 
@@ -81,13 +79,13 @@ class UserAccountTestCase(TestCase):
 
         account = UserAccount.objects.get()
 
-        with capture_on_commit_callbacks(execute=True) as callbacks:
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
             org.name = "Coursera Wizardry"
             org.save()
 
             account.save()
         
-        self.assertEquals(len(callbacks), 1)
+        self.assertEqual(len(callbacks), 1)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(
             mail.outbox[0].subject, "The name of your organization has changed!"
@@ -107,7 +105,7 @@ class UserAccountTestCase(TestCase):
 
         mail.outbox = []
 
-        with capture_on_commit_callbacks(execute=True) as callbacks:
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
             account = UserAccount.objects.get()
 
             org.name = "Hogwarts Online"
@@ -115,7 +113,7 @@ class UserAccountTestCase(TestCase):
 
             account.save()
 
-        self.assertEquals(len(callbacks), 1, msg="Only one hook should be an on_commit callback")
+        self.assertEqual(len(callbacks), 1, msg="Only one hook should be an on_commit callback")
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(
             mail.outbox[1].subject, "The name of your organization has changed!"
